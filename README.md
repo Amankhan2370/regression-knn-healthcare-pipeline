@@ -58,8 +58,8 @@ regression-knn-healthcare-pipeline/
 ├── README.md
 ├── requirements.txt
 ├── ml_pipeline.py      # Main pipeline script
-├── hw4_train.csv       # Training data
-└── hw4_test.csv        # Test data
+├── train.csv           # Training data
+└── test.csv            # Test data
 ```
 
 ---
@@ -91,7 +91,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-Place `hw4_train.csv` and `hw4_test.csv` in the project root (or adjust paths in `ml_pipeline.py`), then run:
+Place `train.csv` and `test.csv` in the project root (or adjust paths in `ml_pipeline.py`), then run:
 
 ```bash
 python ml_pipeline.py
