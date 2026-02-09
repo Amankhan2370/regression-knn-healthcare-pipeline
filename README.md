@@ -2,6 +2,19 @@
 
 A two-stage machine learning pipeline for healthcare data: impute **BloodPressure** via Multiple Linear Regression, then classify **Outcome** with K-Nearest Neighbors (KNN).
 
+## Project Goals
+
+- **Impute missing clinical measurements** in a principled, model-driven way (BloodPressure).
+- **Evaluate classification performance** for predicting patient Outcome across multiple KNN neighborhood sizes.
+- **Provide a clean, reproducible pipeline** that is easy to extend and compare against alternative models.
+
+## Key Features
+
+- End-to-end flow from raw CSVs to model evaluation
+- Clear separation of regression (imputation) and classification (prediction)
+- Deterministic runs via a fixed random seed
+- Transparent reporting of accuracy across k values
+
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.0+-F89939?style=flat-square&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 [![pandas](https://img.shields.io/badge/pandas-1.0+-150458?style=flat-square&logo=pandas&logoColor=white)](https://pandas.pydata.org/)
@@ -37,6 +50,22 @@ flowchart LR
 |-------|------|--------|--------|
 | **1** | Impute missing BloodPressure | Multiple Linear Regression | `BloodPressure` |
 | **2** | Binary classification | KNN (k = 1 … 19) | `Outcome` |
+
+### Detailed Methodology
+
+**Stage 1 — Regression Imputation**
+
+1. Select all features except `BloodPressure` and `Outcome`.
+2. Fit a `LinearRegression` model on the training set.
+3. Predict `BloodPressure` for the test set.
+4. Replace the original `BloodPressure` column in test data with predictions.
+
+**Stage 2 — KNN Classification**
+
+1. Use all features except `Outcome`.
+2. Train `KNeighborsClassifier` models for $k = 1\ldots19$.
+3. Evaluate accuracy on the test set.
+4. Report per-k accuracy and the best-performing k.
 
 ---
 
@@ -106,11 +135,56 @@ python ml_pipeline.py
 
 ---
 
-## Data
+## Input Data Specification
 
-- **Target (Stage 1):** `BloodPressure` (numeric)
-- **Target (Stage 2):** `Outcome` (binary)
-- **Features:** All other columns (e.g. Pregnancies, Glucose, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age)
+The pipeline expects two CSV files with identical schemas: `train.csv` and `test.csv`.
+
+**Required columns**
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `Pregnancies` | numeric | Number of pregnancies |
+| `Glucose` | numeric | Plasma glucose concentration |
+| `BloodPressure` | numeric | Diastolic blood pressure (mm Hg) |
+| `SkinThickness` | numeric | Triceps skin fold thickness (mm) |
+| `Insulin` | numeric | 2-hour serum insulin (mu U/ml) |
+| `BMI` | numeric | Body mass index (weight in kg/(height in m)^2) |
+| `DiabetesPedigreeFunction` | numeric | Diabetes pedigree function score |
+| `Age` | numeric | Age in years |
+| `Outcome` | binary | 0 = negative, 1 = positive |
+
+> If your dataset uses different column names, update the feature selection logic in `ml_pipeline.py`.
+
+---
+
+## Modeling Notes
+
+- **Why Linear Regression for imputation?** It is fast, interpretable, and serves as a strong baseline for continuous feature recovery.
+- **Why KNN for classification?** It captures local structure without heavy assumptions about feature distributions.
+- **Metric:** Accuracy is reported for each k. For imbalanced datasets, consider adding precision/recall or AUC.
+
+## Reproducibility
+
+- A fixed NumPy random seed is set in the script for deterministic results.
+- For exact reproducibility, keep dependency versions consistent via [requirements.txt](requirements.txt).
+
+## Configuration
+
+- **CSV paths:** Update the filenames in `load_data()` inside [ml_pipeline.py](ml_pipeline.py) if your data lives elsewhere.
+- **K range:** Modify the loop in `stage2_knn_classification()` to explore additional neighborhood sizes.
+
+## Assumptions & Limitations
+
+- The pipeline assumes all numeric features are already clean and scaled reasonably.
+- No explicit missing-value handling is performed besides the BloodPressure imputation step.
+- KNN can be sensitive to feature scales; consider adding standardization if needed.
+
+## Extension Ideas
+
+- Add feature scaling (e.g., StandardScaler) before KNN.
+- Replace linear regression with Ridge/Lasso or tree-based regressors.
+- Add cross-validation and stratified splits for more robust evaluation.
+- Log metrics to a file or integrate with experiment tracking tools.
 
 ---
 
