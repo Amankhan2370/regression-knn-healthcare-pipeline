@@ -24,6 +24,10 @@ A two-stage machine learning pipeline for healthcare data: impute **BloodPressur
 
 ## Pipeline Overview
 
+## Visual Summary
+
+![Pipeline visual from submission](submission-visual.png)
+
 ```mermaid
 flowchart LR
     subgraph Load
